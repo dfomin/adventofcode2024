@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 
-use adventofcode2024::read_input;
-
-fn part1(input: &str) -> i32 {
+pub fn part1(input: &str) -> i32 {
     let (mut first, mut second) = input.lines().fold((vec![], vec![]), |mut acc, line| {
         let mut iter = line.split_whitespace().map(|s| s.parse::<i32>().unwrap());
         acc.0.push(iter.next().unwrap());
@@ -17,7 +15,7 @@ fn part1(input: &str) -> i32 {
         .fold(0, |acc, (x, y)| acc + (x - y).abs())
 }
 
-fn part2(input: &str) -> i32 {
+pub fn part2(input: &str) -> i32 {
     let (first, second): (Vec<i32>, HashMap<i32, i32>) =
         input
             .lines()
@@ -30,13 +28,6 @@ fn part2(input: &str) -> i32 {
     first
         .into_iter()
         .fold(0, |acc, x| acc + x * second.get(&x).unwrap_or(&0))
-}
-
-fn main() {
-    let input = read_input(1);
-
-    println!("{}", part1(&input));
-    println!("{}", part2(&input));
 }
 
 #[cfg(test)]
