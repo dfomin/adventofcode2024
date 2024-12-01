@@ -1,13 +1,4 @@
-pub mod day1;
-
-use std::fs;
-
-pub fn read_input(day: i32) -> String {
-    fs::read_to_string(format!("inputs/day{}.txt", day))
-        .unwrap()
-        .trim()
-        .to_string()
-}
+use adventofcode2024::{day1, read_input};
 
 fn main() {
     let input = read_input(1);
@@ -18,7 +9,7 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use crate::day1::part1;
+    use adventofcode2024::day1::part1;
 
     const INPUT: &str = "3   4
 4   3
