@@ -7,8 +7,8 @@ pub fn part1(input: &str) -> i32 {
         acc.1.push(iter.next().unwrap());
         acc
     });
-    first.sort();
-    second.sort();
+    first.sort_unstable();
+    second.sort_unstable();
     first
         .into_iter()
         .zip(second)
