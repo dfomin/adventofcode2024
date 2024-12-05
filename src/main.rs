@@ -1,10 +1,10 @@
-use adventofcode2024::{day1, day2, day3, read_input};
+use adventofcode2024::{day1, day2, day3, day4, day5, read_input};
 
 fn main() {
-    let input = read_input(3);
+    let input = read_input(5);
 
-    println!("{}", day3::part1(&input));
-    println!("{}", day3::part2(&input));
+    println!("{}", day5::part1(&input));
+    println!("{}", day5::part2(&input));
 }
 
 #[cfg(test)]
