@@ -1,45 +1,52 @@
-use ahash::{AHashMap, AHashSet};
+enum SimulationResult {
+    Cycle,
+    Route(i32, Vec<Vec<i32>>),
+}
 
-pub fn part1(input: &str) -> i32 {
+fn parse(input: &str) -> (Vec<Vec<u8>>, (i32, i32), usize) {
     let mut field = vec![];
-    let shifts = [(0, -1), (1, 0), (0, 1), (-1, 0)];
-    let mut visited = AHashSet::new();
     let mut pos = (0, 0);
     let mut dir = 0;
-    let mut x_obstacles: AHashMap<usize, Vec<usize>> = AHashMap::new();
-    let mut y_obstacles: AHashMap<usize, Vec<usize>> = AHashMap::new();
+    let mut found = false;
     for (i, line) in input.lines().map(|x| x.trim()).enumerate() {
         let last_line = line.as_bytes().to_vec();
-        for j in 0..last_line.len() {
-            match last_line[j] {
-                b'#' => {
-                    x_obstacles.entry(j).or_default().push(i);
-                    y_obstacles.entry(i).or_default().push(j);
-                }
-                b'^' => {
-                    pos = (j as i32, i as i32);
-                    dir = 0;
-                }
-                b'>' => {
-                    pos = (j as i32, i as i32);
-                    dir = 1;
-                }
-                b'v' => {
-                    pos = (j as i32, i as i32);
-                    dir = 2;
-                }
-                b'<' => {
-                    pos = (j as i32, i as i32);
-                    dir = 3;
-                }
-                _ => (),
+        if !found {
+            if let Some(j) = last_line.iter().position(|&x| x == b'^') {
+                pos = (j as i32, i as i32);
+                dir = 0;
+                found = true;
+            }
+            if let Some(j) = last_line.iter().position(|&x| x == b'>') {
+                pos = (j as i32, i as i32);
+                dir = 1;
+                found = true;
+            }
+            if let Some(j) = last_line.iter().position(|&x| x == b'v') {
+                pos = (j as i32, i as i32);
+                dir = 2;
+                found = true;
+            }
+            if let Some(j) = last_line.iter().position(|&x| x == b'<') {
+                pos = (j as i32, i as i32);
+                dir = 3;
+                found = true;
             }
         }
         field.push(last_line);
     }
+    (field, pos, dir)
+}
+
+fn simulate(field: &[Vec<u8>], mut pos: (i32, i32), mut dir: usize) -> SimulationResult {
+    let mut visited = vec![vec![0; field[0].len()]; field.len()];
+    let shifts = [(0, -1), (1, 0), (0, 1), (-1, 0)];
+    let mut length = 0;
 
     loop {
-        visited.insert(pos);
+        if visited[pos.1 as usize][pos.0 as usize] == 0 {
+            length += 1;
+        }
+        visited[pos.1 as usize][pos.0 as usize] |= 1 << dir;
 
         let next_x = pos.0 + shifts[dir].0;
         let next_y = pos.1 + shifts[dir].1;
@@ -48,7 +55,7 @@ pub fn part1(input: &str) -> i32 {
             || next_y < 0
             || next_y >= field.len() as i32
         {
-            break;
+            return SimulationResult::Route(length, visited);
         }
 
         if field[next_y as usize][next_x as usize] == b'#' {
@@ -56,91 +63,44 @@ pub fn part1(input: &str) -> i32 {
         } else {
             pos = (next_x, next_y);
         }
-    }
 
-    visited.len() as i32
+        if visited[pos.1 as usize][pos.0 as usize] & (1 << dir) > 0 {
+            return SimulationResult::Cycle;
+        }
+    }
+}
+
+pub fn part1(input: &str) -> i32 {
+    let (field, pos, dir) = parse(input);
+
+    if let SimulationResult::Route(length, visited) = simulate(&field, pos, dir) {
+        length
+    } else {
+        panic!("Cycle found");
+    }
 }
 
 pub fn part2(input: &str) -> i32 {
-    let mut field = vec![];
-    let shifts = [(0, -1), (1, 0), (0, 1), (-1, 0)];
-    let mut pos = (0, 0);
-    let mut dir = 0;
-    let mut x_obstacles: AHashMap<usize, Vec<usize>> = AHashMap::new();
-    let mut y_obstacles: AHashMap<usize, Vec<usize>> = AHashMap::new();
-    for (i, line) in input.lines().map(|x| x.trim()).enumerate() {
-        let last_line = line.as_bytes().to_vec();
-        for j in 0..last_line.len() {
-            match last_line[j] {
-                b'#' => {
-                    x_obstacles.entry(j).or_default().push(i);
-                    y_obstacles.entry(i).or_default().push(j);
-                }
-                b'^' => {
-                    pos = (j as i32, i as i32);
-                    dir = 0;
-                }
-                b'>' => {
-                    pos = (j as i32, i as i32);
-                    dir = 1;
-                }
-                b'v' => {
-                    pos = (j as i32, i as i32);
-                    dir = 2;
-                }
-                b'<' => {
-                    pos = (j as i32, i as i32);
-                    dir = 3;
-                }
-                _ => (),
-            }
-        }
-        field.push(last_line);
-    }
+    let (mut field, pos, dir) = parse(input);
+
+    let visited = match simulate(&field, pos, dir) {
+        SimulationResult::Route(_, visited) => visited,
+        _ => panic!("Cycle found"),
+    };
 
     let mut result = 0;
     for i in 0..field.len() {
-        for j in 0..field[i].len() {
-            if field[i][j] == b'.' {
+        for j in 0..field[0].len() {
+            if visited[i][j] > 0 {
                 field[i][j] = b'#';
-                let orig_pos = pos;
-                let orig_dir = dir;
-                let mut visited = AHashSet::new();
-                let mut escape = false;
-                loop {
-                    if !visited.insert((pos.0, pos.1, dir)) {
-                        break;
-                    }
-
-                    let next_x = pos.0 + shifts[dir].0;
-                    let next_y = pos.1 + shifts[dir].1;
-                    if next_x < 0
-                        || next_x >= field[0].len() as i32
-                        || next_y < 0
-                        || next_y >= field.len() as i32
-                    {
-                        escape = true;
-                        break;
-                    }
-
-                    if field[next_y as usize][next_x as usize] == b'#' {
-                        dir = (dir + 1) % shifts.len();
-                    } else {
-                        pos = (next_x, next_y);
-                    }
-                }
-
-                if !escape {
-                    result += 1;
-                }
-
+                result += match simulate(&field, pos, dir) {
+                    SimulationResult::Cycle => 1,
+                    _ => 0,
+                };
                 field[i][j] = b'.';
-                pos = orig_pos;
-                dir = orig_dir;
             }
         }
     }
-
     result
 }
 
