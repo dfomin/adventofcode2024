@@ -73,7 +73,7 @@ fn simulate(field: &[Vec<u8>], mut pos: (i32, i32), mut dir: usize) -> Simulatio
 pub fn part1(input: &str) -> i32 {
     let (field, pos, dir) = parse(input);
 
-    if let SimulationResult::Route(length, visited) = simulate(&field, pos, dir) {
+    if let SimulationResult::Route(length, _) = simulate(&field, pos, dir) {
         length
     } else {
         panic!("Cycle found");
@@ -91,7 +91,7 @@ pub fn part2(input: &str) -> i32 {
     let mut result = 0;
     for i in 0..field.len() {
         for j in 0..field[0].len() {
-            if visited[i][j] > 0 {
+            if visited[i][j] > 0 && pos != (j as i32, i as i32) {
                 field[i][j] = b'#';
                 result += match simulate(&field, pos, dir) {
                     SimulationResult::Cycle => 1,
