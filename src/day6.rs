@@ -83,7 +83,7 @@ pub fn part1(input: &str) -> i32 {
 }
 
 pub fn part2(input: &str) -> i32 {
-    let (mut field, pos, dir) = parse(input);
+    let (field, pos, dir) = parse(input);
 
     let visited = match simulate(&field, pos, dir) {
         SimulationResult::Route(_, visited) => visited,
@@ -94,6 +94,7 @@ pub fn part2(input: &str) -> i32 {
         .into_par_iter()
         .map(|i| {
             (0..field[i].len())
+                .into_par_iter()
                 .filter(|&j| {
                     if visited[i][j] > 0 && pos != (j as i32, i as i32) {
                         let mut field_clone = field.clone();
