@@ -1,3 +1,5 @@
+use rayon::prelude::*;
+
 enum SimulationResult {
     Cycle,
     Route(i32, Vec<Vec<i32>>),
@@ -88,20 +90,25 @@ pub fn part2(input: &str) -> i32 {
         _ => panic!("Cycle found"),
     };
 
-    let mut result = 0;
-    for i in 0..field.len() {
-        for j in 0..field[0].len() {
-            if visited[i][j] > 0 && pos != (j as i32, i as i32) {
-                field[i][j] = b'#';
-                result += match simulate(&field, pos, dir) {
-                    SimulationResult::Cycle => 1,
-                    _ => 0,
-                };
-                field[i][j] = b'.';
-            }
-        }
-    }
-    result
+    (0..field.len())
+        .into_par_iter()
+        .map(|i| {
+            (0..field[i].len())
+                .filter(|&j| {
+                    if visited[i][j] > 0 && pos != (j as i32, i as i32) {
+                        let mut field_clone = field.clone();
+                        field_clone[i][j] = b'#';
+                        match simulate(&field_clone, pos, dir) {
+                            SimulationResult::Cycle => true,
+                            _ => false,
+                        }
+                    } else {
+                        false
+                    }
+                })
+                .count() as i32
+        })
+        .sum()
 }
 
 #[cfg(test)]

@@ -1,10 +1,94 @@
-use adventofcode2024::{day1, day2, day3, day4, day5, day6, day7, read_input};
-
 fn main() {
-    let input = read_input(7);
+    let mut day = 1;
+    let input = adventofcode2024::read_input(day);
+    println!(
+        "Day {} part 1: {}",
+        day,
+        adventofcode2024::day1::part1(&input)
+    );
+    println!(
+        "Day {} part 2: {}",
+        day,
+        adventofcode2024::day1::part2(&input)
+    );
 
-    println!("{}", day7::part1(&input));
-    println!("{}", day7::part2(&input));
+    day = 2;
+    let input = adventofcode2024::read_input(day);
+    println!(
+        "Day {} part 1: {}",
+        day,
+        adventofcode2024::day2::part1(&input)
+    );
+    println!(
+        "Day {} part 2: {}",
+        day,
+        adventofcode2024::day2::part2(&input)
+    );
+
+    day = 3;
+    let input = adventofcode2024::read_input(day);
+    println!(
+        "Day {} part 1: {}",
+        day,
+        adventofcode2024::day3::part1(&input)
+    );
+    println!(
+        "Day {} part 2: {}",
+        day,
+        adventofcode2024::day3::part2(&input)
+    );
+
+    day = 4;
+    let input = adventofcode2024::read_input(day);
+    println!(
+        "Day {} part 1: {}",
+        day,
+        adventofcode2024::day4::part1(&input)
+    );
+    println!(
+        "Day {} part 2: {}",
+        day,
+        adventofcode2024::day4::part2(&input)
+    );
+
+    day = 5;
+    let input = adventofcode2024::read_input(day);
+    println!(
+        "Day {} part 1: {}",
+        day,
+        adventofcode2024::day5::part1(&input)
+    );
+    println!(
+        "Day {} part 2: {}",
+        day,
+        adventofcode2024::day5::part2(&input)
+    );
+
+    day = 6;
+    let input = adventofcode2024::read_input(day);
+    println!(
+        "Day {} part 1: {}",
+        day,
+        adventofcode2024::day6::part1(&input)
+    );
+    println!(
+        "Day {} part 2: {}",
+        day,
+        adventofcode2024::day6::part2(&input)
+    );
+
+    day = 7;
+    let input = adventofcode2024::read_input(day);
+    println!(
+        "Day {} part 1: {}",
+        day,
+        adventofcode2024::day7::part1(&input)
+    );
+    println!(
+        "Day {} part 2: {}",
+        day,
+        adventofcode2024::day7::part2(&input)
+    );
 }
 
 #[cfg(test)]

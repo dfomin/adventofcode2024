@@ -17,11 +17,11 @@ macro_rules! create_day_benchmark {
                 });
             }
 
-            criterion_group!(benches, benchmark_day7_part1, benchmark_day7_part2);
+            criterion_group!(benches, [<benchmark_day $day _part1>], [<benchmark_day $day _part2>]);
         }
     };
 }
 
-create_day_benchmark!(7);
+create_day_benchmark!(6);
 
 criterion_main!(benches);
