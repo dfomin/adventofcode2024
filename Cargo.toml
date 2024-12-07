@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 ahash = "0.8.11"
 criterion = "0.5.1"
+paste = "1.0.15"
 regex = "1.11.1"
 
 [[bench]]
