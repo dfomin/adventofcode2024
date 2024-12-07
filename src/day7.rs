@@ -1,3 +1,5 @@
+use rayon::prelude::*;
+
 struct Equation {
     result: i64,
     numbers: Vec<(i64, i64)>,
@@ -43,6 +45,7 @@ fn parse_line(line: &str) -> Equation {
 pub fn part1(input: &str) -> i64 {
     input
         .lines()
+        .par_bridge()
         .map(|x| x.trim())
         .map(|x| parse_line(x))
         .filter(|x| x.solvable(false))
@@ -53,6 +56,7 @@ pub fn part1(input: &str) -> i64 {
 pub fn part2(input: &str) -> i64 {
     input
         .lines()
+        .par_bridge()
         .map(|x| x.trim())
         .map(|x| parse_line(x))
         .filter(|x| x.solvable(true))
