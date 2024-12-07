@@ -6,7 +6,7 @@ enum SimulationResult {
 }
 
 fn parse(input: &str) -> (Vec<Vec<u8>>, (i32, i32), usize) {
-    let mut field = vec![];
+    let mut field = Vec::with_capacity(130);
     let mut pos = (0, 0);
     let mut dir = 0;
     let mut found = false;
