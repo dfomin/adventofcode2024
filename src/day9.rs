@@ -1,5 +1,3 @@
-use std::collections::VecDeque;
-
 #[derive(Debug, Clone, Copy)]
 struct Element {
     number: i64,
@@ -28,12 +26,9 @@ pub fn part1(input: &str) -> i64 {
     let mut index = 0;
     while i <= j {
         if numbers[i].enabled {
-            while numbers[i].number > 0 {
-                result += index * numbers[i].index;
-                index += 1;
-
-                numbers[i].number -= 1;
-            }
+            result +=
+                numbers[i].index * (numbers[i].number * (2 * index + numbers[i].number - 1)) / 2;
+            index += numbers[i].number;
         } else {
             while numbers[i].number > 0 {
                 while numbers[j].number == 0 || !numbers[j].enabled {
@@ -92,13 +87,9 @@ pub fn part2(input: &str) -> i64 {
     let mut index = 0;
     for n in numbers {
         if n.enabled {
-            for _ in 0..n.number {
-                result += n.index * index;
-                index += 1;
-            }
-        } else {
-            index += n.number;
+            result += n.index * (n.number * (2 * index + n.number - 1)) / 2;
         }
+        index += n.number;
     }
     result
 }
