@@ -14,6 +14,9 @@ impl Equation {
         if index == self.numbers.len() {
             return cur == self.result;
         }
+        if cur > self.result {
+            return false;
+        }
         if self.backtrack(cur + self.numbers[index].0, index + 1, concat) {
             true
         } else if self.backtrack(cur * self.numbers[index].0, index + 1, concat) {
