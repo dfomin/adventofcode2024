@@ -28,11 +28,7 @@ impl Machine {
             let t = (x2 * (y3 - y2) - y2 * (x3 - x2)) / d;
             let x = t * x1;
             let y = t * y1;
-            if x % self.ax == 0
-                && (self.px - x) % self.bx == 0
-                && y % self.ay == 0
-                && (self.py - y) % self.by == 0
-            {
+            if (self.px - x) % self.bx == 0 && (self.py - y) % self.by == 0 {
                 Some(3 * (x / self.ax) + (self.px - x) / self.bx)
             } else {
                 None
