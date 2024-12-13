@@ -11,13 +11,7 @@ struct Machine {
 
 impl Machine {
     fn price(&self) -> Option<i64> {
-        let x1 = self.ax;
-        let y1 = self.ay;
-        let x2 = self.px - self.bx;
-        let y2 = self.py - self.by;
-        let x3 = self.px;
-        let y3 = self.py;
-        let d = x1 * (y3 - y2) - y1 * (x3 - x2);
+        let d = self.ax * self.by - self.ay * self.bx;
         if d == 0 {
             if self.px % self.ax == 0 && self.ay * (self.px / self.ax) == self.py {
                 Some((3 * self.px / self.ax).min(self.py / self.ay))
@@ -25,11 +19,10 @@ impl Machine {
                 None
             }
         } else {
-            let t = (x2 * (y3 - y2) - y2 * (x3 - x2)) / d;
-            let x = t * x1;
-            let y = t * y1;
-            if (self.px - x) % self.bx == 0 && (self.py - y) % self.by == 0 {
-                Some(3 * (x / self.ax) + (self.px - x) / self.bx)
+            let a = (self.px * self.by - self.py * self.bx) / d;
+            let b = (self.ax * self.py - self.ay * self.px) / d;
+            if self.ax * a + self.bx * b == self.px && self.ay * a + self.by * b == self.py {
+                Some(3 * a + b)
             } else {
                 None
             }
