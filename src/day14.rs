@@ -113,8 +113,35 @@ pub fn part2(input: &str) -> i32 {
     let width = 101;
     let height = 103;
     let robots = parse(input);
+    let (mut x, mut y) = ((1_000_000.0, 0), (1_000_000.0, 0));
+    for i in 0..width.max(height) {
+        let sums = robots.iter().fold((0, 0), |acc, robot| {
+            let (x, y) = robot.apply_steps(i, width, height);
+            (acc.0 + x, acc.1 + y)
+        });
+        let (mean_x, mean_y) = (
+            sums.0 as f64 / robots.len() as f64,
+            sums.1 as f64 / robots.len() as f64,
+        );
+        let vars = robots.iter().fold((0.0, 0.0), |acc, robot| {
+            let (x, y) = robot.apply_steps(i, width, height);
+            (
+                acc.0 + (mean_x - x as f64) * (mean_x - x as f64),
+                acc.1 + (mean_y - y as f64) * (mean_y - y as f64),
+            )
+        });
+        if vars.0 < x.0 {
+            x.0 = vars.0;
+            x.1 = i;
+        }
+        if vars.1 < y.0 {
+            y.0 = vars.1;
+            y.1 = i;
+        }
+    }
+
     for i in 1..20000 {
-        if find_clusters(&robots, i, width, height, 229) {
+        if i % width == x.1 && i % height == y.1 {
             return i;
         }
     }
