@@ -108,7 +108,7 @@ pub fn part2(input: &str) -> i64 {
     let width = 101;
     let height = 103;
     let mut robots = parse(input);
-    for i in 1.. {
+    for i in 1..20000 {
         simulate(&mut robots, width, height, 1);
         let cluster = find_clusters(&robots, width, height);
         if cluster == 229 {
