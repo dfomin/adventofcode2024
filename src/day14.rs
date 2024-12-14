@@ -83,20 +83,28 @@ fn dfs(field: &mut [Vec<u32>], x: usize, y: usize) -> i32 {
     result
 }
 
-fn find_clusters(robots: &[Robot], width: i32, height: i32) -> i32 {
+fn find_clusters(robots: &[Robot], width: i32, height: i32, size: i32) -> bool {
     let mut field = vec![vec![0; width as usize]; height as usize];
     for robot in robots {
         field[robot.y as usize][robot.x as usize] = 1;
     }
-    let mut result = 0;
+    let mut cur = 0;
     for i in 0..height as usize {
         for j in 0..width as usize {
             if field[i][j] == 1 {
-                result = result.max(dfs(&mut field, j, i));
+                let cluster = dfs(&mut field, j, i);
+                if cluster == size {
+                    return true;
+                } else {
+                    cur += cluster;
+                    if width * height - cur < size {
+                        return false;
+                    }
+                }
             }
         }
     }
-    result
+    false
 }
 
 pub fn part1(input: &str) -> i32 {
@@ -110,8 +118,7 @@ pub fn part2(input: &str) -> i64 {
     let mut robots = parse(input);
     for i in 1..20000 {
         simulate(&mut robots, width, height, 1);
-        let cluster = find_clusters(&robots, width, height);
-        if cluster == 229 {
+        if find_clusters(&robots, width, height, 229) {
             return i;
         }
     }
