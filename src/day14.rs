@@ -9,13 +9,15 @@ struct Robot {
 }
 
 impl Robot {
-    fn update(&mut self, width: i32, height: i32) {
-        self.x = (self.x + self.vx + width) % width;
-        self.y = (self.y + self.vy + height) % height;
+    fn apply_steps(&self, steps: i32, width: i32, height: i32) -> (i32, i32) {
+        (
+            ((self.x + self.vx * steps) % width + width) % width,
+            ((self.y + self.vy * steps) % height + height) % height,
+        )
     }
 
-    fn quadrant(&self, width: i32, height: i32) -> Option<usize> {
-        match (self.x.cmp(&(width / 2)), self.y.cmp(&(height / 2))) {
+    fn quadrant(x: i32, y: i32, width: i32, height: i32) -> Option<usize> {
+        match (x.cmp(&(width / 2)), y.cmp(&(height / 2))) {
             (Ordering::Less, Ordering::Less) => Some(0),
             (Ordering::Greater, Ordering::Less) => Some(1),
             (Ordering::Less, Ordering::Greater) => Some(2),
@@ -45,18 +47,12 @@ fn parse(input: &str) -> Vec<Robot> {
         .collect()
 }
 
-fn simulate(robots: &mut Vec<Robot>, width: i32, height: i32, steps: i32) -> i32 {
-    _ = (0..steps)
-        .map(|_| {
-            robots
-                .iter_mut()
-                .for_each(|robot| robot.update(width, height));
-        })
-        .collect::<()>();
+fn simulate(robots: &Vec<Robot>, width: i32, height: i32, steps: i32) -> i32 {
     robots
         .iter()
         .fold([0; 4], |mut acc, robot| {
-            if let Some(index) = robot.quadrant(width, height) {
+            let pos = robot.apply_steps(steps, width, height);
+            if let Some(index) = Robot::quadrant(pos.0, pos.1, width, height) {
                 acc[index] += 1;
             }
             acc
@@ -83,10 +79,11 @@ fn dfs(field: &mut [Vec<u32>], x: usize, y: usize) -> i32 {
     result
 }
 
-fn find_clusters(robots: &[Robot], width: i32, height: i32, size: i32) -> bool {
+fn find_clusters(robots: &[Robot], steps: i32, width: i32, height: i32, size: i32) -> bool {
     let mut field = vec![vec![0; width as usize]; height as usize];
     for robot in robots {
-        field[robot.y as usize][robot.x as usize] = 1;
+        let pos = robot.apply_steps(steps, width, height);
+        field[pos.1 as usize][pos.0 as usize] = 1;
     }
     let mut cur = 0;
     for i in 0..height as usize {
@@ -108,17 +105,16 @@ fn find_clusters(robots: &[Robot], width: i32, height: i32, size: i32) -> bool {
 }
 
 pub fn part1(input: &str) -> i32 {
-    let mut robots = parse(input);
-    simulate(&mut robots, 101, 103, 100)
+    let robots = parse(input);
+    simulate(&robots, 101, 103, 100)
 }
 
-pub fn part2(input: &str) -> i64 {
+pub fn part2(input: &str) -> i32 {
     let width = 101;
     let height = 103;
-    let mut robots = parse(input);
+    let robots = parse(input);
     for i in 1..20000 {
-        simulate(&mut robots, width, height, 1);
-        if find_clusters(&robots, width, height, 229) {
+        if find_clusters(&robots, i, width, height, 229) {
             return i;
         }
     }
