@@ -79,31 +79,6 @@ fn dfs(field: &mut [Vec<u32>], x: usize, y: usize) -> i32 {
     result
 }
 
-fn find_clusters(robots: &[Robot], steps: i32, width: i32, height: i32, size: i32) -> bool {
-    let mut field = vec![vec![0; width as usize]; height as usize];
-    for robot in robots {
-        let pos = robot.apply_steps(steps, width, height);
-        field[pos.1 as usize][pos.0 as usize] = 1;
-    }
-    let mut cur = 0;
-    for i in 0..height as usize {
-        for j in 0..width as usize {
-            if field[i][j] == 1 {
-                let cluster = dfs(&mut field, j, i);
-                if cluster == size {
-                    return true;
-                } else {
-                    cur += cluster;
-                    if width * height - cur < size {
-                        return false;
-                    }
-                }
-            }
-        }
-    }
-    false
-}
-
 pub fn part1(input: &str) -> i32 {
     let robots = parse(input);
     simulate(&robots, 101, 103, 100)
