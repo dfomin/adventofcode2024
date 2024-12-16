@@ -99,10 +99,7 @@ pub fn part2(input: &str) -> i32 {
                     if visited[i][j] > 0 && pos != (j as i32, i as i32) {
                         let mut field_clone = field.clone();
                         field_clone[i][j] = b'#';
-                        match simulate(&field_clone, pos, dir) {
-                            SimulationResult::Cycle => true,
-                            _ => false,
-                        }
+                        matches!(simulate(&field_clone, pos, dir), SimulationResult::Cycle)
                     } else {
                         false
                     }

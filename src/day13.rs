@@ -58,20 +58,18 @@ fn parse(input: &str) -> Vec<Machine> {
 pub fn part1(input: &str) -> i64 {
     parse(input)
         .iter()
-        .map(|machine| machine.price())
-        .filter_map(|price| price)
+        .filter_map(|machine| machine.price())
         .sum()
 }
 
 pub fn part2(input: &str) -> i64 {
     parse(input)
         .iter_mut()
-        .map(|machine| {
+        .filter_map(|machine| {
             machine.px += 10_000_000_000_000;
             machine.py += 10_000_000_000_000;
             machine.price()
         })
-        .filter_map(|price| price)
         .sum()
 }
 

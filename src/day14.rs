@@ -47,7 +47,7 @@ fn parse(input: &str) -> Vec<Robot> {
         .collect()
 }
 
-fn simulate(robots: &Vec<Robot>, width: i32, height: i32, steps: i32) -> i32 {
+fn simulate(robots: &[Robot], width: i32, height: i32, steps: i32) -> i32 {
     robots
         .iter()
         .fold([0; 4], |mut acc, robot| {
@@ -59,24 +59,6 @@ fn simulate(robots: &Vec<Robot>, width: i32, height: i32, steps: i32) -> i32 {
         })
         .iter()
         .product()
-}
-
-fn dfs(field: &mut [Vec<u32>], x: usize, y: usize) -> i32 {
-    field[y][x] = 2;
-    let mut result = 1;
-    for shift in [(-1, 0), (1, 0), (0, -1), (0, 1)] {
-        let new_x = x as i32 + shift.0;
-        let new_y = y as i32 + shift.1;
-        if new_x >= 0
-            && new_x < field[0].len() as i32
-            && new_y >= 0
-            && new_y < field.len() as i32
-            && field[new_y as usize][new_x as usize] == 1
-        {
-            result += dfs(field, new_x as usize, new_y as usize);
-        }
-    }
-    result
 }
 
 pub fn part1(input: &str) -> i32 {

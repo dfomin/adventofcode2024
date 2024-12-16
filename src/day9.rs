@@ -65,9 +65,7 @@ pub fn part2(input: &str) -> i64 {
             i += 1;
         }
         if i < j {
-            let t = numbers[i];
-            numbers[i] = numbers[j];
-            numbers[j] = t;
+            numbers.swap(i, j);
             if numbers[i].number < numbers[j].number {
                 numbers.insert(
                     i + 1,

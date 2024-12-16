@@ -26,8 +26,8 @@ pub fn part1(input: &str) -> i32 {
             let mut ok = true;
             for i in 1..update.len() {
                 if let Some(set) = pairs.get(&update[i]) {
-                    for j in 0..i {
-                        if set.contains(&update[j]) {
+                    for value in update.iter().take(i) {
+                        if set.contains(value) {
                             ok = false;
                             break;
                         }
@@ -66,8 +66,8 @@ pub fn part2(input: &str) -> i32 {
             let mut ok = true;
             for i in 1..update.len() {
                 if let Some(set) = pairs.get(&update[i]) {
-                    for j in 0..i {
-                        if set.contains(&update[j]) {
+                    for value in update.iter().take(i) {
+                        if set.contains(value) {
                             ok = false;
                             break;
                         }
@@ -77,7 +77,7 @@ pub fn part2(input: &str) -> i32 {
             if !ok {
                 update.sort_by(|a, b| {
                     if let Some(set) = pairs.get(a) {
-                        return if set.contains(&b) {
+                        return if set.contains(b) {
                             Ordering::Less
                         } else {
                             Ordering::Greater

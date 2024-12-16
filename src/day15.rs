@@ -100,13 +100,6 @@ fn move_wide_box(field: &mut Vec<Vec<u8>>, x: usize, y: usize, dir: (i32, i32)) 
     }
 }
 
-fn print_field(field: &Vec<Vec<u8>>) {
-    for row in field {
-        let line: String = row.into_iter().map(|&byte| char::from(byte)).collect();
-        println!("{}", line);
-    }
-}
-
 pub fn part1(input: &str) -> i64 {
     let (mut field, instructions, (mut x, mut y)) = parse(input);
     for direction in instructions {

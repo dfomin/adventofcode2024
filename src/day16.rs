@@ -1,4 +1,4 @@
-use std::{collections::BinaryHeap, i64, sync::mpsc::RecvError};
+use std::collections::BinaryHeap;
 
 #[derive(Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 struct Position {
@@ -115,7 +115,7 @@ fn find_record(
     visited[start.y][start.x][dir_to_index(start.dir)] = 0;
     heap.push((heuristic(&start, &end), 0, start));
     while let Some((_, current_points, position)) = heap.pop() {
-        for (next_position, points) in position.step(&field) {
+        for (next_position, points) in position.step(field) {
             if points >= result {
                 continue;
             }
@@ -135,13 +135,7 @@ fn find_record(
     result
 }
 
-fn find_path(
-    field: &[Vec<u8>],
-    start: Position,
-    end: Position,
-    visited: &[Vec<[i64; 4]>],
-    record: i64,
-) -> i64 {
+fn find_path(field: &[Vec<u8>], end: Position, visited: &[Vec<[i64; 4]>], record: i64) -> i64 {
     let mut paths: Vec<Vec<i64>> = vec![vec![0i64; field[0].len()]; field.len()];
     let mut points = vec![
         (
@@ -204,7 +198,7 @@ pub fn part2(input: &str) -> i64 {
     let (field, start, end) = parse(input);
     let mut visited = vec![vec![[i64::MAX; 4]; field[0].len()]; field.len()];
     let record = find_record(&field, start, end, &mut visited);
-    find_path(&field, start, end, &visited, record)
+    find_path(&field, end, &visited, record)
 }
 
 #[cfg(test)]

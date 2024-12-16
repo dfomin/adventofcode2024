@@ -17,9 +17,9 @@ impl Equation {
         if cur > self.result {
             return false;
         }
-        if self.backtrack(cur + self.numbers[index].0, index + 1, concat) {
-            true
-        } else if self.backtrack(cur * self.numbers[index].0, index + 1, concat) {
+        if self.backtrack(cur + self.numbers[index].0, index + 1, concat)
+            || self.backtrack(cur * self.numbers[index].0, index + 1, concat)
+        {
             true
         } else if concat {
             self.backtrack(
@@ -40,7 +40,7 @@ fn parse_line(line: &str) -> Equation {
         .next()
         .unwrap()
         .split_whitespace()
-        .map(|x| (x.parse().unwrap(), 10i64.pow(x.len() as u32) as i64))
+        .map(|x| (x.parse().unwrap(), 10i64.pow(x.len() as u32)))
         .collect();
     Equation { result, numbers }
 }
@@ -50,7 +50,7 @@ pub fn part1(input: &str) -> i64 {
         .lines()
         .par_bridge()
         .map(|x| x.trim())
-        .map(|x| parse_line(x))
+        .map(parse_line)
         .filter(|x| x.solvable(false))
         .map(|x| x.result)
         .sum()
@@ -61,7 +61,7 @@ pub fn part2(input: &str) -> i64 {
         .lines()
         .par_bridge()
         .map(|x| x.trim())
-        .map(|x| parse_line(x))
+        .map(parse_line)
         .filter(|x| x.solvable(true))
         .map(|x| x.result)
         .sum()

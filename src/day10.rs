@@ -10,7 +10,7 @@ fn dfs(field: &[Vec<u8>], visited: &mut [Vec<bool>], use_visited: bool, x: i32, 
 
     let value = field[uy][ux];
     if value == b'9' {
-        return 1;
+        1
     } else {
         [(-1, 0), (0, 1), (1, 0), (0, -1)]
             .iter()

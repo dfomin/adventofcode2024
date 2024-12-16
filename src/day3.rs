@@ -21,10 +21,10 @@ pub fn part2(input: &str) -> i32 {
     let mut result = 0;
     let mut enabled = true;
     for caps in re.captures_iter(input) {
-        if let Some(_) = caps.name("c") {
+        if caps.name("c").is_some() {
             enabled = true;
         }
-        if let Some(_) = caps.name("d") {
+        if caps.name("d").is_some() {
             enabled = false;
         }
         if enabled {
