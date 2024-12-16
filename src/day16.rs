@@ -1,7 +1,5 @@
 use std::{collections::BinaryHeap, i64};
 
-use ahash::{AHashMap, AHashSet};
-
 #[derive(Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 struct Position {
     x: usize,
@@ -44,6 +42,16 @@ impl Position {
     }
 }
 
+fn dir_to_index(dir: (i32, i32)) -> usize {
+    match dir {
+        (-1, 0) => 0,
+        (1, 0) => 1,
+        (0, -1) => 2,
+        (0, 1) => 3,
+        _ => panic!("Unexpected"),
+    }
+}
+
 fn parse(input: &str) -> (Vec<Vec<u8>>, Position, Position) {
     let field: Vec<Vec<u8>> = input
         .trim()
@@ -79,18 +87,24 @@ fn parse(input: &str) -> (Vec<Vec<u8>>, Position, Position) {
 }
 
 fn heuristic(position: &Position, end: &Position) -> i64 {
-    (end.x.abs_diff(position.x) + end.y.abs_diff(position.y)) as i64
+    (end.x.abs_diff(position.x)
+        + end.y.abs_diff(position.y)
+        + if end.x != position.x && end.y != position.y {
+            10000
+        } else {
+            0
+        }) as i64
 }
 
 fn find_record(
     field: &[Vec<u8>],
     start: Position,
     end: Position,
-    visited: &mut AHashMap<Position, i64>,
+    visited: &mut [Vec<[i64; 4]>],
 ) -> i64 {
     let mut heap: BinaryHeap<(i64, i64, Position)> = BinaryHeap::new();
     let mut result = i64::MAX;
-    visited.insert(start, 0);
+    visited[start.y][start.x][dir_to_index(start.dir)] = 0;
     heap.push((heuristic(&start, &end), 0, start));
     while let Some((_, current_points, position)) = heap.pop() {
         for (next_position, points) in position.step(&field) {
@@ -101,16 +115,11 @@ fn find_record(
             if next_position.x == end.x && next_position.y == end.y {
                 result = result.min(new_points);
             }
-            let mut add = false;
-            if let Some(&prev_points) = visited.get(&next_position) {
-                if prev_points > new_points {
-                    add = true;
-                }
-            } else {
-                add = true;
-            }
-            if add {
-                visited.insert(next_position, new_points);
+            let prev_points =
+                visited[next_position.y][next_position.x][dir_to_index(next_position.dir)];
+            if prev_points > new_points {
+                visited[next_position.y][next_position.x][dir_to_index(next_position.dir)] =
+                    new_points;
                 heap.push((heuristic(&next_position, &end), new_points, next_position));
             }
         }
@@ -122,47 +131,51 @@ fn find_path(
     field: &[Vec<u8>],
     start: Position,
     end: Position,
-    visited: &AHashMap<Position, i64>,
+    visited: &[Vec<[i64; 4]>],
     record: i64,
 ) -> i64 {
-    let mut heap: BinaryHeap<(i64, i64, Position, Vec<Position>)> = BinaryHeap::new();
-    let mut paths: AHashSet<(usize, usize)> = AHashSet::new();
-    paths.insert((end.x, end.y));
-    heap.push((heuristic(&start, &end), 0, start, vec![start]));
+    let mut heap: BinaryHeap<(i64, i64, Position, Vec<(usize, usize)>)> = BinaryHeap::new();
+    let mut paths: Vec<Vec<i64>> = vec![vec![0i64; field[0].len()]; field.len()];
+    heap.push((heuristic(&start, &end), 0, start, vec![(start.x, start.y)]));
     while let Some((_, current_points, position, history)) = heap.pop() {
         if position.x == end.x && position.y == end.y && current_points == record {
-            for p in &history {
-                paths.insert((p.x, p.y));
+            paths[end.y][end.x] = 1;
+            for &p in &history {
+                paths[p.1][p.0] = 1;
             }
+            continue;
         }
         for (next_position, points) in position.step(&field) {
             let new_points = current_points + points;
-            if let Some(&prev_points) = visited.get(&next_position) {
-                if prev_points == new_points {
-                    let mut new_history = history.clone();
-                    new_history.push(position);
-                    heap.push((
-                        heuristic(&next_position, &end),
-                        new_points,
-                        next_position,
-                        new_history,
-                    ));
-                }
+            let prev_points =
+                visited[next_position.y][next_position.x][dir_to_index(next_position.dir)];
+            if prev_points == new_points {
+                let mut new_history = history.clone();
+                new_history.push((position.x, position.y));
+                heap.push((
+                    heuristic(&next_position, &end),
+                    new_points,
+                    next_position,
+                    new_history,
+                ));
             }
         }
     }
-    paths.len() as i64
+    paths
+        .into_iter()
+        .map(|line| line.into_iter().sum::<i64>())
+        .sum::<i64>()
 }
 
 pub fn part1(input: &str) -> i64 {
     let (field, start, end) = parse(input);
-    let mut visited: AHashMap<Position, i64> = AHashMap::new();
+    let mut visited = vec![vec![[i64::MAX; 4]; field[0].len()]; field.len()];
     find_record(&field, start, end, &mut visited)
 }
 
 pub fn part2(input: &str) -> i64 {
     let (field, start, end) = parse(input);
-    let mut visited: AHashMap<Position, i64> = AHashMap::new();
+    let mut visited = vec![vec![[i64::MAX; 4]; field[0].len()]; field.len()];
     let record = find_record(&field, start, end, &mut visited);
     find_path(&field, start, end, &visited, record)
 }
