@@ -1,4 +1,4 @@
-use std::{collections::BinaryHeap, i64};
+use std::{collections::BinaryHeap, i64, sync::mpsc::RecvError};
 
 #[derive(Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 struct Position {
@@ -8,9 +8,9 @@ struct Position {
 }
 
 impl Position {
-    fn step(&self, field: &[Vec<u8>]) -> Vec<(Position, i64)> {
-        let new_x = (self.x as i32 + self.dir.0) as usize;
-        let new_y = (self.y as i32 + self.dir.1) as usize;
+    fn step_to_dir(&self, dir: (i32, i32), field: &[Vec<u8>]) -> Vec<(Position, i64)> {
+        let new_x = (self.x as i32 + dir.0) as usize;
+        let new_y = (self.y as i32 + dir.1) as usize;
         let mut result = vec![];
         if field[new_y][new_x] != b'#' {
             result.push((
@@ -39,6 +39,14 @@ impl Position {
             1000,
         ));
         result
+    }
+
+    fn step(&self, field: &[Vec<u8>]) -> Vec<(Position, i64)> {
+        self.step_to_dir(self.dir, field)
+    }
+
+    fn step_back(&self, field: &[Vec<u8>]) -> Vec<(Position, i64)> {
+        self.step_to_dir((-self.dir.0, -self.dir.1), field)
     }
 }
 
@@ -134,30 +142,49 @@ fn find_path(
     visited: &[Vec<[i64; 4]>],
     record: i64,
 ) -> i64 {
-    let mut heap: BinaryHeap<(i64, i64, Position, Vec<(usize, usize)>)> = BinaryHeap::new();
     let mut paths: Vec<Vec<i64>> = vec![vec![0i64; field[0].len()]; field.len()];
-    heap.push((heuristic(&start, &end), 0, start, vec![(start.x, start.y)]));
-    while let Some((_, current_points, position, history)) = heap.pop() {
-        if position.x == end.x && position.y == end.y && current_points == record {
-            paths[end.y][end.x] = 1;
-            for &p in &history {
-                paths[p.1][p.0] = 1;
-            }
-            continue;
-        }
-        for (next_position, points) in position.step(&field) {
-            let new_points = current_points + points;
-            let prev_points =
-                visited[next_position.y][next_position.x][dir_to_index(next_position.dir)];
-            if prev_points == new_points {
-                let mut new_history = history.clone();
-                new_history.push((position.x, position.y));
-                heap.push((
-                    heuristic(&next_position, &end),
-                    new_points,
-                    next_position,
-                    new_history,
-                ));
+    let mut points = vec![
+        (
+            Position {
+                x: end.x,
+                y: end.y,
+                dir: (0, 1),
+            },
+            record,
+        ),
+        (
+            Position {
+                x: end.x,
+                y: end.y,
+                dir: (0, -1),
+            },
+            record,
+        ),
+        (
+            Position {
+                x: end.x,
+                y: end.y,
+                dir: (1, 0),
+            },
+            record,
+        ),
+        (
+            Position {
+                x: end.x,
+                y: end.y,
+                dir: (-1, 0),
+            },
+            record,
+        ),
+    ];
+    paths[end.y][end.x] = 1;
+    while let Some((position, value)) = points.pop() {
+        for (prev_position, points_change) in position.step_back(field) {
+            if visited[prev_position.y][prev_position.x][dir_to_index(prev_position.dir)]
+                == value - points_change
+            {
+                paths[prev_position.y][prev_position.x] = 1;
+                points.push((prev_position, value - points_change));
             }
         }
     }
