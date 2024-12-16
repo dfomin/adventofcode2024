@@ -98,7 +98,7 @@ fn heuristic(position: &Position, end: &Position) -> i64 {
     (end.x.abs_diff(position.x)
         + end.y.abs_diff(position.y)
         + if end.x != position.x && end.y != position.y {
-            10000
+            2000
         } else {
             0
         }) as i64
