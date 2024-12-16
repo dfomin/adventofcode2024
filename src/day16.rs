@@ -110,16 +110,19 @@ fn find_record(
     end: Position,
     visited: &mut [Vec<[i64; 4]>],
 ) -> i64 {
-    let mut heap: BinaryHeap<(i64, i64, Position)> = BinaryHeap::new();
+    let mut heap: BinaryHeap<(i64, i64, Position)> = BinaryHeap::with_capacity(1024);
     let mut result = i64::MAX;
     visited[start.y][start.x][dir_to_index(start.dir)] = 0;
     heap.push((heuristic(&start, &end), 0, start));
     while let Some((_, current_points, position)) = heap.pop() {
+        if current_points >= result {
+            continue;
+        }
         for (next_position, points) in position.step(field) {
-            if points >= result {
+            let new_points = current_points + points;
+            if new_points >= result {
                 continue;
             }
-            let new_points = current_points + points;
             if next_position.x == end.x && next_position.y == end.y {
                 result = result.min(new_points);
             }
@@ -128,7 +131,11 @@ fn find_record(
             if prev_points > new_points {
                 visited[next_position.y][next_position.x][dir_to_index(next_position.dir)] =
                     new_points;
-                heap.push((heuristic(&next_position, &end), new_points, next_position));
+                heap.push((
+                    -heuristic(&next_position, &end) - new_points,
+                    new_points,
+                    next_position,
+                ));
             }
         }
     }
