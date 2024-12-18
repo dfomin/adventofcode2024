@@ -58,7 +58,7 @@ fn parse(input: &str) -> Vec<(usize, usize)> {
 
 fn solve(obstacles: &[(usize, usize)], width: usize, height: usize) -> i64 {
     let mut field = vec![vec![false; width]; height];
-    for (i, o) in obstacles.iter().enumerate() {
+    for o in obstacles {
         field[o.1][o.0] = true;
     }
     let mut visited = vec![vec![i64::MAX; width]; height];
