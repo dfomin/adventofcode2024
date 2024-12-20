@@ -1,3 +1,4 @@
+use rayon::prelude::*;
 use std::collections::BinaryHeap;
 
 const DIRS: [(i32, i32); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
@@ -123,32 +124,42 @@ fn solve(input: &str, cheats: i64, difference: i64) -> i64 {
     let mut visited = vec![vec![i64::MAX; field[0].len()]; field.len()];
     let record = find_record(&field, start, end, &mut visited);
     let (new_field, path) = find_path(&field, end, &visited, record);
-    let mut result = 0;
-    for position in path.iter().rev() {
-        for y_diff in -cheats..=cheats {
-            for x_diff in -cheats + y_diff.abs()..=cheats - y_diff.abs() {
-                let new_x = position.x as i64 + x_diff;
-                let new_y = position.y as i64 + y_diff;
-                if new_x > 0
-                    && new_x < field[0].len() as i64 - 1
-                    && new_y > 0
-                    && new_y < field.len() as i64 - 1
-                {
-                    let new_x = new_x as usize;
-                    let new_y = new_y as usize;
-                    if new_field[new_y][new_x]
-                        >= new_field[position.y][position.x]
-                            + x_diff.abs()
-                            + y_diff.abs()
-                            + difference
-                    {
-                        result += 1;
-                    }
-                }
-            }
-        }
-    }
-    result
+    path.par_iter()
+        .rev()
+        .map(|position| {
+            (-cheats..=cheats)
+                .into_iter()
+                .map(|y_diff| {
+                    (-cheats + y_diff.abs()..=cheats - y_diff.abs())
+                        .into_iter()
+                        .fold(0, |acc, x_diff| {
+                            let new_x = position.x as i64 + x_diff;
+                            let new_y = position.y as i64 + y_diff;
+                            if new_x > 0
+                                && new_x < field[0].len() as i64 - 1
+                                && new_y > 0
+                                && new_y < field.len() as i64 - 1
+                            {
+                                let new_x = new_x as usize;
+                                let new_y = new_y as usize;
+                                if new_field[new_y][new_x]
+                                    >= new_field[position.y][position.x]
+                                        + x_diff.abs()
+                                        + y_diff.abs()
+                                        + difference
+                                {
+                                    acc + 1
+                                } else {
+                                    acc
+                                }
+                            } else {
+                                acc
+                            }
+                        })
+                })
+                .sum::<i64>()
+        })
+        .sum()
 }
 
 pub fn part1(input: &str) -> i64 {
