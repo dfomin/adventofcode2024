@@ -30,12 +30,12 @@ impl Computer {
             match program[self.pointer] {
                 0 => {
                     let operand = self.combo(program[self.pointer + 1]);
-                    self.a = self.a / (2i64.pow(operand as u32));
+                    self.a /= 2i64.pow(operand as u32);
                     self.pointer += 2;
                 }
                 1 => {
                     let operand = program[self.pointer + 1];
-                    self.b = self.b ^ operand;
+                    self.b ^= operand;
                     self.pointer += 2;
                 }
                 2 => {
@@ -52,7 +52,7 @@ impl Computer {
                     }
                 }
                 4 => {
-                    self.b = self.b ^ self.c;
+                    self.b ^= self.c;
                     self.pointer += 2;
                 }
                 5 => {
@@ -84,15 +84,7 @@ fn parse(input: &str) -> (Computer, Vec<i64>) {
         .unwrap()
         .lines()
         .skip_while(|line| line.is_empty())
-        .map(|x| {
-            x.trim()
-                .split(": ")
-                .skip(1)
-                .next()
-                .unwrap()
-                .parse::<i64>()
-                .unwrap()
-        });
+        .map(|x| x.trim().split(": ").nth(1).unwrap().parse::<i64>().unwrap());
     let a = registers.next().unwrap();
     let b = registers.next().unwrap();
     let c = registers.next().unwrap();
@@ -102,8 +94,7 @@ fn parse(input: &str) -> (Computer, Vec<i64>) {
         .unwrap()
         .trim()
         .split(": ")
-        .skip(1)
-        .next()
+        .nth(1)
         .unwrap()
         .split(",")
         .map(|x| x.parse::<i64>().unwrap())

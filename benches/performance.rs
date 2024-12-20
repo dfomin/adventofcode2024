@@ -22,6 +22,6 @@ macro_rules! create_day_benchmark {
     };
 }
 
-create_day_benchmark!(19);
+create_day_benchmark!(20);
 
 criterion_main!(benches);

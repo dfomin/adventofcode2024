@@ -5,10 +5,11 @@ fn check(pattern: &str, parts: &[&str]) -> bool {
         return true;
     }
     for part in parts {
-        if part.len() <= pattern.len() && *part == &pattern[..part.len()] {
-            if check(&pattern[part.len()..], parts) {
-                return true;
-            }
+        if part.len() <= pattern.len()
+            && *part == &pattern[..part.len()]
+            && check(&pattern[part.len()..], parts)
+        {
+            return true;
         }
     }
     false
@@ -19,7 +20,7 @@ fn count(pattern: &str, parts: &[&str], cache: &mut AHashMap<String, i64>) -> i6
         return 1;
     }
     parts
-        .into_iter()
+        .iter()
         .filter(|&part| part.len() <= pattern.len() && *part == &pattern[..part.len()])
         .map(|part| {
             if let Some(&result) = cache.get(&pattern[part.len()..]) {
