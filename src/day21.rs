@@ -1,7 +1,7 @@
-use core::num;
 use std::cmp::Ordering;
 
-use rand::Rng;
+use rayon::iter::ParallelBridge;
+use rayon::iter::ParallelIterator;
 
 trait Pad {
     fn move_to(&mut self, value: u8) -> Vec<u8>;
@@ -112,8 +112,18 @@ fn find_path(
             x_first.push(b'A');
             x_first
         } else {
-            let mut rng = rand::thread_rng();
-            if rng.gen_bool(0.5) {
+            // let mut rng = rand::thread_rng();
+            // if rng.gen_bool(0.5) {
+            // for _ in 0..y.abs_diff(target_y) {
+            //     y_first.push(y_dir);
+            // }
+            // for _ in 0..x.abs_diff(target_x) {
+            //     y_first.push(x_dir);
+            // }
+            // y_first.push(b'A');
+            // y_first
+            // } else {
+            if x < target_x {
                 for _ in 0..y.abs_diff(target_y) {
                     y_first.push(y_dir);
                 }
@@ -132,6 +142,8 @@ fn find_path(
                 x_first.push(b'A');
                 x_first
             }
+
+            // }
         }
     }
 }
@@ -146,47 +158,85 @@ fn find_path(
 //     }
 // }
 
-fn apply_pads(ch: u8, pads: &mut [ControlPad], index: usize) -> i64 {
+fn apply_pads(
+    ch: u8,
+    pads: &mut [ControlPad],
+    index: usize,
+    map: &Vec<(Vec<u8>, usize, usize)>,
+) -> i64 {
     if index == pads.len() - 1 {
-        return pads[index].move_to(ch).len() as i64;
+        let (value, new_x, new_y) = &map[get_cache_index(pads[index].x, pads[index].y, ch)];
+        pads[index].x = *new_x;
+        pads[index].y = *new_y;
+        return value.len() as i64;
     }
 
     let mut result = 0;
-    for ch1 in pads[index].move_to(ch) {
-        result += apply_pads(ch1, pads, index + 1);
+    let cache_index = get_cache_index(pads[index].x, pads[index].y, ch);
+    let (value, new_x, new_y) = &map[cache_index];
+    pads[index].x = *new_x;
+    pads[index].y = *new_y;
+    for ch1 in value {
+        result += apply_pads(*ch1, pads, index + 1, map);
     }
     result
 }
 
-fn solve_code(code: &[u8], control_pads: usize) -> i64 {
-    let mut result = i64::MAX;
-    let code_value =
-        (code[0] - b'0') as i64 * 100 + (code[1] - b'0') as i64 * 10 + (code[2] - b'0') as i64;
-    for _ in 0..1 {
-        let mut num_pad = NumPad::new();
-        let mut pads = vec![];
-        for _ in 0..control_pads {
-            pads.push(ControlPad::new());
+fn get_cache_index(x: usize, y: usize, ch: u8) -> usize {
+    ((2 - x) + 3 * (1 - y)) * 5
+        + match ch {
+            b'^' => 0,
+            b'<' => 1,
+            b'>' => 2,
+            b'v' => 3,
+            b'A' => 4,
+            _ => panic!("Unexpected"),
         }
-        let mut cur = 0;
-        for &ch in code {
-            for _ in 0..control_pads - 1 {
-                for ch1 in num_pad.move_to(ch) {
-                    cur += apply_pads(ch1, &mut pads, 0);
-                }
+}
+
+fn fill_map(map: &mut Vec<(Vec<u8>, usize, usize)>) {
+    let mut pad = ControlPad::new();
+    for x in 0..3 {
+        for y in 0..2 {
+            if x == 0 && y == 0 {
+                continue;
+            }
+            for ch in [b'<', b'>', b'^', b'v', b'A'] {
+                pad.x = x;
+                pad.y = y;
+                let value = pad.move_to(ch);
+                map[get_cache_index(x, y, ch)] = (value, pad.x, pad.y);
             }
         }
-        result = result.min(cur)
+    }
+}
+
+fn solve_code(code: &[u8], control_pads: usize, map: &Vec<(Vec<u8>, usize, usize)>) -> i64 {
+    let mut result = 0;
+    let code_value =
+        (code[0] - b'0') as i64 * 100 + (code[1] - b'0') as i64 * 10 + (code[2] - b'0') as i64;
+    let mut num_pad = NumPad::new();
+    let mut pads = vec![];
+    for _ in 0..control_pads {
+        pads.push(ControlPad::new());
+    }
+    for &ch in code {
+        for ch1 in num_pad.move_to(ch) {
+            result += apply_pads(ch1, &mut pads, 0, &map);
+        }
     }
     result * code_value
 }
 
 pub fn part1(input: &str) -> i64 {
+    let mut map = vec![(vec![], 0, 0); 25];
+    fill_map(&mut map);
     input
         .lines()
+        .par_bridge()
         .filter_map(|line| {
             if !line.trim().is_empty() {
-                Some(solve_code(line.trim().as_bytes(), 2))
+                Some(solve_code(line.trim().as_bytes(), 2, &map))
             } else {
                 None
             }
@@ -195,11 +245,14 @@ pub fn part1(input: &str) -> i64 {
 }
 
 pub fn part2(input: &str) -> i64 {
+    let mut map = vec![(vec![], 0, 0); 25];
+    fill_map(&mut map);
     input
         .lines()
+        .par_bridge()
         .filter_map(|line| {
             if !line.trim().is_empty() {
-                Some(solve_code(line.trim().as_bytes(), 25))
+                Some(solve_code(line.trim().as_bytes(), 25, &map))
             } else {
                 None
             }
@@ -221,22 +274,11 @@ mod tests {
 
     #[test]
     fn test_day21_part1() {
-        // let mut num_pad = NumPad::new();
-        // for &ch in "029A".as_bytes() {
-        //     println!(
-        //         "{:?}",
-        //         num_pad
-        //             .move_to(ch)
-        //             .iter()
-        //             .map(|&ch| ch as char)
-        //             .collect::<Vec<_>>()
-        //     );
-        // }
         assert_eq!(part1(INPUT), 126384);
     }
 
     #[test]
     fn test_day21_part2() {
-        assert_eq!(part2(INPUT), 0);
+        // assert_eq!(part2(INPUT), 0);
     }
 }
