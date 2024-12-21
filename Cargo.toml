@@ -8,6 +8,7 @@ ahash = "0.8.11"
 criterion = "0.5.1"
 itertools = "0.13.0"
 paste = "1.0.15"
+rand = "0.8.5"
 rayon = "1.10.0"
 regex = "1.11.1"
 
