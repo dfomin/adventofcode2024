@@ -108,26 +108,24 @@ fn find_path(
             }
             x_first.push(b'A');
             x_first
-        } else {
-            if x < target_x {
-                for _ in 0..y.abs_diff(target_y) {
-                    y_first.push(y_dir);
-                }
-                for _ in 0..x.abs_diff(target_x) {
-                    y_first.push(x_dir);
-                }
-                y_first.push(b'A');
-                y_first
-            } else {
-                for _ in 0..x.abs_diff(target_x) {
-                    x_first.push(x_dir);
-                }
-                for _ in 0..y.abs_diff(target_y) {
-                    x_first.push(y_dir);
-                }
-                x_first.push(b'A');
-                x_first
+        } else if x < target_x {
+            for _ in 0..y.abs_diff(target_y) {
+                y_first.push(y_dir);
             }
+            for _ in 0..x.abs_diff(target_x) {
+                y_first.push(x_dir);
+            }
+            y_first.push(b'A');
+            y_first
+        } else {
+            for _ in 0..x.abs_diff(target_x) {
+                x_first.push(x_dir);
+            }
+            for _ in 0..y.abs_diff(target_y) {
+                x_first.push(y_dir);
+            }
+            x_first.push(b'A');
+            x_first
         }
     }
 }
@@ -178,7 +176,7 @@ fn get_cache_index(x: usize, y: usize, ch: u8) -> usize {
         }
 }
 
-fn fill_map(map: &mut Vec<(Vec<u8>, usize, usize)>) {
+fn fill_map(map: &mut [(Vec<u8>, usize, usize)]) {
     let mut pad = ControlPad::new();
     for x in 0..3 {
         for y in 0..2 {
@@ -209,7 +207,7 @@ fn solve_code(code: &[u8], control_pads: usize, map: &Vec<(Vec<u8>, usize, usize
         for ch1 in num_pad.move_to(ch) {
             let index = get_cache_index(pads[0].x, pads[0].y, ch1);
             if map1[index].0 == -1 {
-                let value = apply_pads(ch1, &mut pads, 0, &map, &mut map1);
+                let value = apply_pads(ch1, &mut pads, 0, map, &mut map1);
                 map1[index] = (value, pads[0].x, pads[0].y);
             }
             result += map1[index].0;

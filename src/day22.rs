@@ -1,10 +1,9 @@
 use ahash::AHashMap;
+use rayon::prelude::*;
 
-fn process_secret(
-    mut secret: i64,
-    steps: usize,
-    use_map: bool,
-) -> (i64, AHashMap<(i64, i64, i64, i64), i64>) {
+type TupleFour = (i64, i64, i64, i64);
+
+fn process_secret(mut secret: i64, steps: usize, use_map: bool) -> (i64, AHashMap<TupleFour, i64>) {
     let mut hash_map = AHashMap::new();
     let mut ones = [secret % 10; 4];
     for i in 0..steps {
@@ -26,10 +25,8 @@ fn process_secret(
 
         ones[(i + 1) % 4] = cur_ones;
 
-        if use_map && i >= 3 {
-            if !hash_map.contains_key(&tuple) {
-                hash_map.insert(tuple, cur_ones);
-            }
+        if use_map && i >= 3 && !hash_map.contains_key(&tuple) {
+            hash_map.insert(tuple, cur_ones);
         }
     }
 
@@ -39,6 +36,7 @@ fn process_secret(
 pub fn part1(input: &str) -> i64 {
     input
         .lines()
+        .par_bridge()
         .filter_map(|line| {
             if !line.trim().is_empty() {
                 Some(process_secret(line.trim().parse().unwrap(), 2000, false).0)
@@ -52,6 +50,7 @@ pub fn part1(input: &str) -> i64 {
 pub fn part2(input: &str) -> i64 {
     let maps = input
         .lines()
+        .par_bridge()
         .filter_map(|line| {
             if !line.trim().is_empty() {
                 Some(process_secret(line.trim().parse().unwrap(), 2000, true).1)
