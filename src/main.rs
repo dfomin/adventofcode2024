@@ -271,6 +271,19 @@ fn main() {
         day,
         adventofcode2024::day21::part2(&input)
     );
+
+    day = 22;
+    let input = adventofcode2024::read_input(day);
+    println!(
+        "Day {} part 1: {}",
+        day,
+        adventofcode2024::day22::part1(&input)
+    );
+    println!(
+        "Day {} part 2: {}",
+        day,
+        adventofcode2024::day22::part2(&input)
+    );
 }
 
 #[cfg(test)]
