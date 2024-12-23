@@ -1,6 +1,6 @@
 use ahash::{AHashMap, AHashSet};
 
-fn parse(input: &str) -> (Vec<Vec<bool>>, AHashSet<usize>, Vec<String>) {
+fn parse(input: &str) -> (Vec<AHashSet<usize>>, AHashSet<usize>, Vec<String>) {
     let pairs = input
         .lines()
         .map(|line| line.trim())
@@ -21,12 +21,12 @@ fn parse(input: &str) -> (Vec<Vec<bool>>, AHashSet<usize>, Vec<String>) {
         .enumerate()
         .map(|(i, v)| (v.clone(), i))
         .collect::<AHashMap<_, _>>();
-    let mut edges = vec![vec![false; vertices.len()]; vertices.len()];
+    let mut edges = vec![AHashSet::new(); vertices.len()];
     pairs.into_iter().for_each(|pair| {
         let s = vertices_ids[pair[0]];
         let d = vertices_ids[pair[1]];
-        edges[s][d] = true;
-        edges[d][s] = true;
+        edges[s].insert(d);
+        edges[d].insert(s);
     });
     let special = vertices_ids
         .into_iter()
@@ -37,7 +37,7 @@ fn parse(input: &str) -> (Vec<Vec<bool>>, AHashSet<usize>, Vec<String>) {
 }
 
 fn bron_kerbosch(
-    edges: &Vec<Vec<bool>>,
+    edges: &Vec<AHashSet<usize>>,
     r: AHashSet<usize>,
     mut p: AHashSet<usize>,
     mut x: AHashSet<usize>,
@@ -52,14 +52,12 @@ fn bron_kerbosch(
             let mut new_p = AHashSet::new();
             let mut new_x = AHashSet::new();
             new_r.insert(v);
-            for n in 0..edges[v].len() {
-                if edges[v][n] {
-                    if p.contains(&n) {
-                        new_p.insert(n);
-                    }
-                    if x.contains(&n) {
-                        new_x.insert(n);
-                    }
+            for &n in edges[v].iter() {
+                if p.contains(&n) {
+                    new_p.insert(n);
+                }
+                if x.contains(&n) {
+                    new_x.insert(n);
                 }
             }
             bron_kerbosch(edges, new_r, new_p, new_x, cliques);
@@ -74,12 +72,12 @@ pub fn part1(input: &str) -> i64 {
     let mut count = [0; 3];
     for &v in &special {
         for i in 0..edges.len() {
-            if !edges[v][i] {
+            if !edges[v].contains(&i) {
                 continue;
             }
             for j in i + 1..edges.len() {
-                if edges[v][j] {
-                    if edges[i][j] {
+                if edges[v].contains(&j) {
+                    if edges[i].contains(&j) {
                         let mut index = 0;
                         if special.contains(&i) {
                             index += 1;
