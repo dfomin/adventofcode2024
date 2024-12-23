@@ -38,9 +38,9 @@ fn parse(input: &str) -> (Vec<Vec<bool>>, AHashSet<usize>, Vec<String>) {
 
 fn bron_kerbosch(
     edges: &Vec<Vec<bool>>,
-    r: &mut AHashSet<usize>,
-    p: &mut AHashSet<usize>,
-    x: &mut AHashSet<usize>,
+    r: AHashSet<usize>,
+    mut p: AHashSet<usize>,
+    mut x: AHashSet<usize>,
     cliques: &mut Vec<AHashSet<usize>>,
 ) {
     if p.is_empty() && x.is_empty() {
@@ -62,7 +62,7 @@ fn bron_kerbosch(
                     }
                 }
             }
-            bron_kerbosch(edges, &mut new_r, &mut new_p, &mut new_x, cliques);
+            bron_kerbosch(edges, new_r, new_p, new_x, cliques);
             p.remove(&v);
             x.insert(v);
         }
@@ -98,11 +98,11 @@ pub fn part1(input: &str) -> i64 {
 
 pub fn part2(input: &str) -> String {
     let (edges, _, vertices) = parse(input);
-    let mut r = AHashSet::new();
-    let mut p = (0..edges.len()).collect::<AHashSet<_>>();
-    let mut x = AHashSet::new();
+    let r = AHashSet::new();
+    let p = (0..edges.len()).collect::<AHashSet<_>>();
+    let x = AHashSet::new();
     let mut cliques = vec![];
-    bron_kerbosch(&edges, &mut r, &mut p, &mut x, &mut cliques);
+    bron_kerbosch(&edges, r, p, x, &mut cliques);
     let clique = cliques
         .iter()
         .map(|x| (x.len(), x))
