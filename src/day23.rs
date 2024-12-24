@@ -76,17 +76,15 @@ pub fn part1(input: &str) -> i64 {
                 continue;
             }
             for j in i + 1..edges.len() {
-                if edges[v].contains(&j) {
-                    if edges[i].contains(&j) {
-                        let mut index = 0;
-                        if special.contains(&i) {
-                            index += 1;
-                        }
-                        if special.contains(&j) {
-                            index += 1;
-                        }
-                        count[index] += 1;
+                if edges[v].contains(&j) && edges[i].contains(&j) {
+                    let mut index = 0;
+                    if special.contains(&i) {
+                        index += 1;
                     }
+                    if special.contains(&j) {
+                        index += 1;
+                    }
+                    count[index] += 1;
                 }
             }
         }
