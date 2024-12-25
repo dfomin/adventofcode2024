@@ -51,7 +51,7 @@ pub fn part1(input: &str) -> i64 {
     result
 }
 
-pub fn part2(input: &str) -> i64 {
+pub fn part2(_: &str) -> i64 {
     0
 }
 
