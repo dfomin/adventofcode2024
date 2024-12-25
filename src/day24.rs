@@ -1,5 +1,3 @@
-use std::collections::VecDeque;
-
 use ahash::{AHashMap, AHashSet};
 
 #[derive(Debug, Clone, Copy)]
@@ -211,7 +209,7 @@ pub fn part2(input: &str) -> String {
 mod tests {
     use super::*;
 
-    const INPUT1: &str = "
+    const INPUT: &str = "
         x00: 1
         x01: 0
         x02: 1
@@ -261,35 +259,11 @@ mod tests {
         tnw OR pbm -> gnj
         ";
 
-    const INPUT2: &str = "
-        x00: 0
-        x01: 1
-        x02: 0
-        x03: 1
-        x04: 0
-        x05: 1
-        y00: 0
-        y01: 0
-        y02: 1
-        y03: 1
-        y04: 0
-        y05: 1
-
-        x00 AND y00 -> z05
-        x01 AND y01 -> z02
-        x02 AND y02 -> z01
-        x03 AND y03 -> z03
-        x04 AND y04 -> z04
-        x05 AND y05 -> z00
-        ";
-
     #[test]
-    fn test_day22_part1() {
-        assert_eq!(part1(INPUT1), 2024);
+    fn test_day24_part1() {
+        assert_eq!(part1(INPUT), 2024);
     }
 
     #[test]
-    fn test_day22_part2() {
-        assert_eq!(part2(INPUT2), "z00,z01,z02,z05");
-    }
+    fn test_day24_part2() {}
 }

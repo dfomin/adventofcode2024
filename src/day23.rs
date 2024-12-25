@@ -153,12 +153,12 @@ mod tests {
         ";
 
     #[test]
-    fn test_day22_part1() {
+    fn test_day23_part1() {
         assert_eq!(part1(INPUT), 7);
     }
 
     #[test]
-    fn test_day22_part2() {
+    fn test_day23_part2() {
         assert_eq!(part2(INPUT), "co,de,ka,ta");
     }
 }
